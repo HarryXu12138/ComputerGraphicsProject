@@ -1,15 +1,13 @@
 var analyserNode;
 
 function getFrequencyData() {
-	var bufferLength = analyserNode.frequencyBinCount;
-	var data = new Uint8Array(bufferLength);
+	var data = new Uint8Array(analyserNode.frequencyBinCount);
 	analyserNode.getByteFrequencyData(data);
 	return data;
 }
 
 function getTimeDomainData() {
-	var bufferLength = analyserNode.frequencyBinCount;
-	var data = new Uint8Array(bufferLength);
+	var data = new Uint8Array(analyserNode.fftSize);
 	analyserNode.getByteTimeDomainData();
 	return data;
 }
@@ -21,19 +19,14 @@ function AudioAnalysisInitialize() {
 	var audioSource = document.getElementById("AudioSource");
 	audioSource.autoplay = true;
 	audioSource.loop = true;
-
-	document.getElementById("playButton").onclick = function(event) {
-		var audioSource = document.getElementById("AudioSource");
-		if (audioSource.paused) audioSource.play();
-		else audioSource.pause();
-	};
+	audioSource.controls = true;
 
 	var sourceNode = audioCtx.createMediaElementSource(audioSource);
 	var gainNode = audioCtx.createGain();
 	analyserNode = audioCtx.createAnalyser();
 	analyserNode.fftSize = 64;
 	analyserNode.minDecibels = -130;
-	analyserNode.maxDecibels = 0;
+	analyserNode.maxDecibels = -10;
 	analyserNode.smoothingTimeConstant = 0.8;
 
 	sourceNode.connect(analyserNode);
@@ -42,17 +35,27 @@ function AudioAnalysisInitialize() {
 }
 
 function showData() {
-	var str = "<table>";
+	var str = "";
 	var data = getFrequencyData();
 	for (var i = 0; i < data.length; ++i) {
-		str += "<tr><td>" + data[i] + "</td></tr>";
+		str += data[i] + "<br>";
 	}
-	str += "</table>";
 	document.getElementById("DataOutput").innerHTML = str;
-	setTimeout(showData, 50);
+	setTimeout(showData, 30);
+}
+
+function reloadFile() {
+	document.getElementById("fileSelector").onchange = function(event) {
+		var fileName = event.target.files[0];
+		console.log(fileName);
+		var objectURL = window.URL.createObjectURL(fileName);
+		document.getElementById("AudioSource").src = objectURL;
+		document.getElementById("AudioSource").load();
+	}
 }
 
 window.onload = function() {
+	reloadFile();
 	AudioAnalysisInitialize();
 	showData();
 };
