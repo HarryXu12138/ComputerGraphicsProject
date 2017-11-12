@@ -1,7 +1,8 @@
 var analyserNode;
 
 function getFrequencyData() {
-	var data = new Uint8Array(analyserNode.frequencyBinCount);
+	// Drop some data for better graph, remove that /3 if you don't want to drop those data.
+	var data = new Uint8Array(analyserNode.frequencyBinCount/3);
 	analyserNode.getByteFrequencyData(data);
 	return data;
 }
@@ -24,7 +25,7 @@ function AudioAnalysisInitialize() {
 	var sourceNode = audioCtx.createMediaElementSource(audioSource);
 	var gainNode = audioCtx.createGain();
 	analyserNode = audioCtx.createAnalyser();
-	analyserNode.fftSize = 64;
+	analyserNode.fftSize = 2048;
 	analyserNode.minDecibels = -130;
 	analyserNode.maxDecibels = 0;
 	analyserNode.smoothingTimeConstant = 0.8;
@@ -55,7 +56,7 @@ function preview() {
 
 		for (var i = 0; i < data.length; ++i) {
 			barHeight = data[i];
-			canvasCtx.fillStyle = "rgb(100,255,0)";
+			canvasCtx.fillStyle = "rgb(0,255,255)";
 			canvasCtx.fillRect(x, HEIGHT-barHeight, barWidth, barHeight);
 
 			x += barWidth + 1;
