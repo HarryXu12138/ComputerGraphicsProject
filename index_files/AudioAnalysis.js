@@ -47,7 +47,6 @@ function showData() {
 function reloadFile() {
 	document.getElementById("fileSelector").onchange = function(event) {
 		var fileName = event.target.files[0];
-		console.log(fileName);
 		var objectURL = window.URL.createObjectURL(fileName);
 		document.getElementById("AudioSource").src = objectURL;
 		document.getElementById("AudioSource").load();
