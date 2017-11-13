@@ -2,7 +2,7 @@ var analyserNode;
 
 function getFrequencyData() {
 	// Drop some data for better graph, remove that /3 if you don't want to drop those data.
-	var data = new Uint8Array(analyserNode.frequencyBinCount/3);
+	var data = new Uint8Array(analyserNode.frequencyBinCount);
 	analyserNode.getByteFrequencyData(data);
 	return data;
 }
@@ -25,7 +25,7 @@ function AudioAnalysisInitialize() {
 	var sourceNode = audioCtx.createMediaElementSource(audioSource);
 	var gainNode = audioCtx.createGain();
 	analyserNode = audioCtx.createAnalyser();
-	analyserNode.fftSize = 2048;
+	analyserNode.fftSize = 1024;
 	analyserNode.minDecibels = -130;
 	analyserNode.maxDecibels = 0;
 	analyserNode.smoothingTimeConstant = 0.8;
@@ -40,7 +40,7 @@ function preview() {
 	var canvasCtx = canvas.getContext("2d");
 	WIDTH = canvas.width;
 	HEIGHT = canvas.height;
-	canvasCtx.fillStyle = "rgb(0,0,0)";
+	canvasCtx.fillStyle = "rgb(255,255,255)";
 	canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
 	function draw() {
@@ -48,7 +48,7 @@ function preview() {
 		if (document.getElementById("audioSource").paused) return;
 		var data = getFrequencyData();
 
-		canvasCtx.fillStyle = "rgb(0,0,0)";
+		canvasCtx.fillStyle = "rgb(255,255,255)";
 		canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 		var barWidth = WIDTH / data.length - 1;
 		var barHeight;
@@ -56,7 +56,11 @@ function preview() {
 
 		for (var i = 0; i < data.length; ++i) {
 			barHeight = data[i];
-			canvasCtx.fillStyle = "rgb(0,255,255)";
+			var r,g,b;
+			r = barHeight;
+			g = i;
+			b = 250-barHeight;
+			canvasCtx.fillStyle = "rgb(" + (r%255) + "," + (g%255) + "," + (b%255) + ")";
 			canvasCtx.fillRect(x, HEIGHT-barHeight, barWidth, barHeight);
 
 			x += barWidth + 1;
