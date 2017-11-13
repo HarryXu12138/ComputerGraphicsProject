@@ -1,7 +1,6 @@
 var analyserNode;
 
 function getFrequencyData() {
-	// Drop some data for better graph, remove that /3 if you don't want to drop those data.
 	var data = new Uint8Array(analyserNode.frequencyBinCount);
 	analyserNode.getByteFrequencyData(data);
 	return data;
@@ -25,7 +24,7 @@ function AudioAnalysisInitialize() {
 	var sourceNode = audioCtx.createMediaElementSource(audioSource);
 	var gainNode = audioCtx.createGain();
 	analyserNode = audioCtx.createAnalyser();
-	analyserNode.fftSize = 1024;
+	analyserNode.fftSize = 256;
 	analyserNode.minDecibels = -130;
 	analyserNode.maxDecibels = 0;
 	analyserNode.smoothingTimeConstant = 0.8;
@@ -38,30 +37,29 @@ function AudioAnalysisInitialize() {
 function preview() {
 	var canvas = document.getElementById("preview");
 	var canvasCtx = canvas.getContext("2d");
-	WIDTH = canvas.width;
-	HEIGHT = canvas.height;
 	canvasCtx.fillStyle = "rgb(255,255,255)";
-	canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+	canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
 	function draw() {
 		requestAnimationFrame(draw);
 		if (document.getElementById("audioSource").paused) return;
+		canvas.width = document.body.clientWidth;
 		var data = getFrequencyData();
 
 		canvasCtx.fillStyle = "rgb(255,255,255)";
-		canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-		var barWidth = WIDTH / data.length - 1;
+		canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+		var barWidth = canvas.width / data.length - 1;
 		var barHeight;
 		var x = 0;
 
 		for (var i = 0; i < data.length; ++i) {
-			barHeight = data[i];
+			barHeight = data[i]*canvas.height/255;
 			var r,g,b;
-			r = barHeight;
+			r = 80;
 			g = i;
-			b = 250-barHeight;
+			b = 180;
 			canvasCtx.fillStyle = "rgb(" + (r%255) + "," + (g%255) + "," + (b%255) + ")";
-			canvasCtx.fillRect(x, HEIGHT-barHeight, barWidth, barHeight);
+			canvasCtx.fillRect(x, canvas.height-barHeight, barWidth, barHeight);
 
 			x += barWidth + 1;
 		}
@@ -80,8 +78,12 @@ function reloadFile() {
 	}
 }
 
-window.onload = function() {
+function veryFirstPreview() {
 	reloadFile();
 	AudioAnalysisInitialize();
 	preview();
+}
+
+window.onload = function() {
+	veryFirstPreview();
 };
