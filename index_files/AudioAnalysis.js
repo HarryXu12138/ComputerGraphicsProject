@@ -24,7 +24,7 @@ function AudioAnalysisInitialize() {
 	var sourceNode = audioCtx.createMediaElementSource(audioSource);
 	var gainNode = audioCtx.createGain();
 	analyserNode = audioCtx.createAnalyser();
-	analyserNode.fftSize = 256;
+	analyserNode.fftSize = 512;
 	analyserNode.minDecibels = -130;
 	analyserNode.maxDecibels = 0;
 	analyserNode.smoothingTimeConstant = 0.8;
