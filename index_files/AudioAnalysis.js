@@ -48,7 +48,7 @@ function preview() {
 
 		canvasCtx.fillStyle = "rgb(255,255,255)";
 		canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-		var barWidth = canvas.width / data.length - 1;
+		var barWidth = canvas.width / data.length - 2;
 		var barHeight;
 		var x = 0;
 
@@ -56,12 +56,12 @@ function preview() {
 			barHeight = data[i]*canvas.height/255;
 			var r,g,b;
 			r = 80;
-			g = i;
+			g = i*2;
 			b = 180;
 			canvasCtx.fillStyle = "rgb(" + (r%255) + "," + (g%255) + "," + (b%255) + ")";
 			canvasCtx.fillRect(x, canvas.height-barHeight, barWidth, barHeight);
 
-			x += barWidth + 1;
+			x += barWidth + 2;
 		}
 	}
 
