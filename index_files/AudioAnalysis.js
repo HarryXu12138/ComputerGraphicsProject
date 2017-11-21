@@ -1,5 +1,9 @@
+var firstPreviewHeight = 350;
+var sphereHeight = 800;
+
+// Some global variables
 var analyserNode;
-var camera, scene, material, mesh, geometry, renderer;
+var camera, scene, renderer;
 
 function getFrequencyData() {
 	var data = new Uint8Array(analyserNode.frequencyBinCount);
@@ -45,6 +49,7 @@ function preview() {
 		requestAnimationFrame(draw);
 		if (document.getElementById("audioSource").paused) return;
 		canvas.width = document.body.clientWidth;
+		canvas.height = firstPreviewHeight;
 		var data = getFrequencyData();
 
 		canvasCtx.fillStyle = "rgb(255,255,255)";
@@ -85,49 +90,46 @@ function veryFirstPreview() {
 	preview();
 }
 
-
-
 function drawSphere() {
-    init();
-    animate();
-    controls = new THREE.OrbitControls( camera, renderer.domElement );
+	init();
+	animate();
+	new THREE.OrbitControls(camera, renderer.domElement);
 }
 
 function init() {
-    // camera 
-    scene = new THREE.Scene()
-    camera = new THREE.PerspectiveCamera(50, window.innerWidth / innerHeight, 1, 1000);
-    camera.position.z = 300;
-    scene.add(camera);
+	// camera 
+	scene = new THREE.Scene()
+	camera = new THREE.PerspectiveCamera(50, document.body.clientWidth/sphereHeight, 1, 1000);
+	camera.position.z = 300;
+	scene.add(camera);
 
-    // sphere object
-    var radius = 50,
-        segments = 30,
-        rings = 5;
-    geometry = new THREE.SphereGeometry(radius, segments, rings);
-    material = new THREE.MeshNormalMaterial({color:0x002288});
-    mesh = new THREE.Mesh(geometry, material);
+	// sphere object
+	var radius = 50,
+		segments = 30,
+		rings = 5;
+	var geometry = new THREE.SphereGeometry(radius, segments, rings);
+	var material = new THREE.MeshNormalMaterial({color:0x002288});
+	var mesh = new THREE.Mesh(geometry, material);
 
-    //scene 
-    ;
-    scene.add(mesh);
+	//scene 
+	scene.add(mesh);
 
-    // renderer
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+	// renderer
+	renderer = new THREE.WebGLRenderer();
+	document.getElementById("mainBody").appendChild(renderer.domElement);
 }
 
 
 function animate() {
-    requestAnimationFrame(animate);
-    render();
+	render();
+	requestAnimationFrame(animate);
 }
 
 function render() {
-    //mesh.rotation.x += .01;
-    //mesh.rotation.y += .02;
-    renderer.render(scene, camera);
+	renderer.setSize(document.body.clientWidth, sphereHeight);
+	camera.aspect = document.body.clientWidth/sphereHeight;
+	camera.updateProjectionMatrix();
+	renderer.render(scene, camera);
 } 
 
 window.onload = function() {
