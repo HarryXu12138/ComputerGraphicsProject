@@ -1,4 +1,5 @@
 var analyserNode;
+var camera, scene, material, mesh, geometry, renderer;
 
 function getFrequencyData() {
 	var data = new Uint8Array(analyserNode.frequencyBinCount);
@@ -84,6 +85,52 @@ function veryFirstPreview() {
 	preview();
 }
 
+
+
+function drawSphere() {
+    init();
+    animate();
+    controls = new THREE.OrbitControls( camera, renderer.domElement );
+}
+
+function init() {
+    // camera 
+    scene = new THREE.Scene()
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth / innerHeight, 1, 1000);
+    camera.position.z = 300;
+    scene.add(camera);
+
+    // sphere object
+    var radius = 50,
+        segments = 30,
+        rings = 5;
+    geometry = new THREE.SphereGeometry(radius, segments, rings);
+    material = new THREE.MeshNormalMaterial({color:0x002288});
+    mesh = new THREE.Mesh(geometry, material);
+
+    //scene 
+    ;
+    scene.add(mesh);
+
+    // renderer
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+}
+
+
+function animate() {
+    requestAnimationFrame(animate);
+    render();
+}
+
+function render() {
+    //mesh.rotation.x += .01;
+    //mesh.rotation.y += .02;
+    renderer.render(scene, camera);
+} 
+
 window.onload = function() {
 	veryFirstPreview();
+	drawSphere();
 };
