@@ -1,9 +1,12 @@
+//Some settings variables
 var firstPreviewHeight = 350;
 var sphereHeight = 800;
 
 // Some global variables
 var analyserNode;
 var camera, scene, renderer;
+
+//-----------------------------Global Variables-----------------------------------------
 
 function getFrequencyData() {
 	var data = new Uint8Array(analyserNode.frequencyBinCount);
@@ -38,6 +41,8 @@ function AudioAnalysisInitialize() {
 	analyserNode.connect(gainNode);
 	gainNode.connect(audioCtx.destination);
 }
+
+//------------------------------Audio Analysis Done--------------------------------------------
 
 function preview() {
 	var canvas = document.getElementById("preview");
@@ -90,6 +95,8 @@ function veryFirstPreview() {
 	preview();
 }
 
+//---------------------------First Simple Preview Done----------------------------
+
 function drawSphere() {
 	init();
 	animate();
@@ -130,7 +137,9 @@ function render() {
 	camera.aspect = document.body.clientWidth/sphereHeight;
 	camera.updateProjectionMatrix();
 	renderer.render(scene, camera);
-} 
+}
+
+//--------------------------Sphere Render Done---------------------------------
 
 window.onload = function() {
 	veryFirstPreview();
