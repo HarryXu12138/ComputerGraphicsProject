@@ -103,12 +103,35 @@ function init() {
 	camera.position.z = 300;
 	scene.add(camera);
 
+	// lights
+	// Ambient Light
+	var ambientlight = new THREE.AmbientLight( 0x404040 ); // soft white light (R, G, B)
+	scene.add( ambientlight );
+	// Point Lights
+	// Get current music data
+
+
+	// Generate point lights according to music
+	function generatePointsLightAndAddToScene() {
+		// Calculate light positions
+
+		// Calculate light color and brightness
+		
+		// Generate point light
+
+	}
+	generatePointsLightAndAddToScene();
+
+	var ptlight = new THREE.PointLight( 0xffffff, 1, 100 ); // (color, intensity, distance, decay)
+	ptlight.position.set( 100, 100, 100 );
+	scene.add( ptlight );
+
 	// sphere object
-	var radius = 50,
+	var radius = 100,
 		segments = 30,
-		rings = 5;
+		rings = 20;
 	var geometry = new THREE.SphereGeometry(radius, segments, rings);
-	var material = new THREE.MeshNormalMaterial({color:0x002288});
+	var material = new THREE.MeshPhongMaterial({wireframe: false, wireframeLinewidth: 2, lights: true});
 	var mesh = new THREE.Mesh(geometry, material);
 
 	//scene 
