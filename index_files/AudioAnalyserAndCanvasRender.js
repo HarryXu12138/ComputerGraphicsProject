@@ -50,6 +50,8 @@ function preview() {
 		if (document.getElementById("audioSource").paused) return;
 		canvas.width = document.body.clientWidth;
 		canvas.height = firstPreviewHeight;
+		// Can choose to use time-domain data or frequency-domain data
+		//var data = getTimeDomainData();
 		var data = getFrequencyData();
 
 		canvasCtx.fillStyle = "rgb(255,255,255)";
@@ -61,8 +63,8 @@ function preview() {
 		for (var i = 0; i < data.length; ++i) {
 			barHeight = data[i]*canvas.height/255;
 			var r,g,b;
-			r = 80;
-			g = i*2;
+			r = 100;
+			g = i;
 			b = 180;
 			canvasCtx.fillStyle = "rgb(" + (r%255) + "," + (g%255) + "," + (b%255) + ")";
 			canvasCtx.fillRect(x, canvas.height-barHeight, barWidth, barHeight);
@@ -93,7 +95,26 @@ function veryFirstPreview() {
 function drawSphere() {
 	init();
 	animate();
-	new THREE.OrbitControls(camera, renderer.domElement);
+}
+
+// Generate point lights according to music
+function generatePointsLightAndAddToScene() {
+	// Get current music data
+	var data = getFrequencyData();
+
+	var ptlight = new THREE.PointLight( 0xffffff, 0.5, 200 ); // (color, intensity, distance, decay)
+	ptlight.position.set( 100, 100, 100 );
+	scene.add( ptlight );
+
+	for (var i = 0; i < data.length; ++i) {
+		console.log(data[i]);
+		// Calculate light positions
+
+		// Calculate light color and brightness
+		
+		// Generate point light
+		ptlight.intensity = data[i];
+	}
 }
 
 function init() {
@@ -107,24 +128,6 @@ function init() {
 	// Ambient Light
 	var ambientlight = new THREE.AmbientLight( 0x404040 ); // soft white light (R, G, B)
 	scene.add( ambientlight );
-	// Point Lights
-	// Get current music data
-
-
-	// Generate point lights according to music
-	function generatePointsLightAndAddToScene() {
-		// Calculate light positions
-
-		// Calculate light color and brightness
-		
-		// Generate point light
-
-	}
-	generatePointsLightAndAddToScene();
-
-	var ptlight = new THREE.PointLight( 0xffffff, 1, 100 ); // (color, intensity, distance, decay)
-	ptlight.position.set( 100, 100, 100 );
-	scene.add( ptlight );
 
 	// sphere object
 	var radius = 100,
@@ -140,6 +143,8 @@ function init() {
 	// renderer
 	renderer = new THREE.WebGLRenderer();
 	document.getElementById("mainBody").appendChild(renderer.domElement);
+
+	new THREE.OrbitControls(camera, renderer.domElement);
 }
 
 
@@ -158,4 +163,5 @@ function render() {
 window.onload = function() {
 	veryFirstPreview();
 	drawSphere();
+	generatePointsLightAndAddToScene();
 };
