@@ -143,6 +143,31 @@ function calculateRGB(color) {
 	return RGB;
 }
 
+function fibonacciSphere(amp, samples, randomize) {
+    var rnd = 1.;
+    if (randomize) {
+        rnd = Math.random() * samples;
+    }
+
+    var points = [];
+    var offset = 2./samples;
+    var increment = Math.PI * (3. - Math.sqrt(5.));
+
+    for (var i=0; i<samples; ++i) {
+        var y = ((i * offset) - 1) + (offset / 2);
+        var r = Math.sqrt(1 - Math.pow(y,2));
+
+        var phi = ((i + rnd) % samples) * increment;
+
+        var x = Math.cos(phi) * r;
+        var z = Math.sin(phi) * r;
+
+        points.push([x*amp,y*amp,z*amp]);
+    }
+
+    return points;
+}
+
 function init() {
 	// camera 
 	scene = new THREE.Scene()
@@ -166,6 +191,24 @@ function init() {
 	//scene 
 	scene.add(mesh);
 
+	/*
+	// TEST FUNCTION
+	function testPointLightGenerator() {
+		var points = fibonacciSphere(120, 30, true);
+		console.log(points.length);
+		for (var i=0; i<points.length; ++i) {
+			var sphere1 = new THREE.SphereGeometry(2, 30, 5);
+			var material1 = new THREE.MeshPhongMaterial({wireframe: false, lights: false});
+			var mesh1 = new THREE.Mesh(sphere1, material1);
+			console.log("No. "+i+": "+points[i][0]+" "+points[i][1]+" "+points[i][2]);
+			scene.add(mesh1);
+			mesh1.position.set(points[i][0], points[i][1], points[i][2]);
+			mesh1.material.color = new THREE.Color(0xffffff);
+		}
+	}
+	testPointLightGenerator();
+	*/
+	
 	// renderer
 	renderer = new THREE.WebGLRenderer();
 	document.getElementById("mainBody").appendChild(renderer.domElement);
@@ -184,7 +227,7 @@ function render() {
 	camera.aspect = document.body.clientWidth/sphereHeight;
 	camera.updateProjectionMatrix();
 	renderer.render(scene, camera);
-} 
+}
 
 window.onload = function() {
 	veryFirstPreview();
