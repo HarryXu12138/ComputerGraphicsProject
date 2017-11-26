@@ -99,22 +99,20 @@ function drawSphere() {
 
 // Generate point lights according to music
 function generatePointsLightAndAddToScene() {
-	// Get current music data
-	var data = getFrequencyData();
-
 	var ptlight = new THREE.PointLight( 0xffffff, 0.5, 200 ); // (color, intensity, distance, decay)
 	ptlight.position.set( 100, 100, 100 );
 	scene.add( ptlight );
 
-	for (var i = 0; i < data.length; ++i) {
-		console.log(data[i]);
-		// Calculate light positions
+	function changeLightIntensity() {
+		// Get current music data
+		var data = getFrequencyData();
+		console.log(data[0]);
+		ptlight.intensity = data[0]/100;
 
-		// Calculate light color and brightness
-		
-		// Generate point light
-		ptlight.intensity = data[i];
+		setTimeout(changeLightIntensity, 1000);
 	}
+
+	changeLightIntensity();
 }
 
 function init() {
