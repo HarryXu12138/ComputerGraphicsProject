@@ -99,20 +99,48 @@ function drawSphere() {
 
 // Generate point lights according to music
 function generatePointsLightAndAddToScene() {
-	var ptlight = new THREE.PointLight( 0xffffff, 0.5, 200 ); // (color, intensity, distance, decay)
+	var ptlight = new THREE.PointLight( 0xffffff, 1, 200 ); // (color, intensity, distance, decay)
 	ptlight.position.set( 100, 100, 100 );
 	scene.add( ptlight );
 
-	function changeLightIntensity() {
+	function changeLightColor() {
+		if (document.getElementById("audioSource").paused) {
+			setTimeout(changeLightColor, 50);
+			return;
+		}
 		// Get current music data
 		var data = getFrequencyData();
-		console.log(data[0]);
-		ptlight.intensity = data[0]/100;
-
-		setTimeout(changeLightIntensity, 1000);
+		var RGB = calculateRGB(data[10]);
+		ptlight.color.setHex("0x"+RGB);
+		console.log("data[0]: " + data[10] + ", " + "RGB: " + RGB);
+		setTimeout(changeLightColor, 50);
 	}
 
-	changeLightIntensity();
+	changeLightColor();
+}
+
+function calculateRGB(color) {
+	var baseColor = 170;	// 85 to 256 -- 1/3 of 256
+	var R = baseColor, G = baseColor, B = baseColor;
+	if (color <= 85)
+		R += color;
+	else if (color>85 && color<=(85*2)) {
+		R = 255;
+		G += color-85;
+	}
+	else if (color>(85*2) && color<=(85*3)) {
+		R = 255;
+		G = 255;
+		B = color-(85*2);
+	}
+	else {
+		console.error("Invalid frequency data. Cannot generate valid color. Color is " + color);
+	}
+
+	// Calculate final RGB value
+	var RGB = (R*65536)+(G*256)+B;
+	RGB = RGB.toString(16);		// Convert to Hex value
+	return RGB;
 }
 
 function init() {
