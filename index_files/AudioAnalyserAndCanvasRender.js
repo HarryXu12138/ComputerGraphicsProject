@@ -29,8 +29,8 @@ function AudioAnalysisInitialize() {
 	var sourceNode = audioCtx.createMediaElementSource(audioSource);
 	var gainNode = audioCtx.createGain();
 	analyserNode = audioCtx.createAnalyser();
-	analyserNode.fftSize = 512;
-	analyserNode.minDecibels = -130;
+	analyserNode.fftSize = 1024;
+	analyserNode.minDecibels = -200;
 	analyserNode.maxDecibels = 0;
 	analyserNode.smoothingTimeConstant = 0.8;
 
@@ -50,8 +50,6 @@ function preview() {
 		if (document.getElementById("audioSource").paused) return;
 		canvas.width = document.body.clientWidth;
 		canvas.height = firstPreviewHeight;
-		// Can choose to use time-domain data or frequency-domain data
-		//var data = getTimeDomainData();
 		var data = getFrequencyData();
 
 		canvasCtx.fillStyle = "rgb(255,255,255)";
@@ -99,9 +97,16 @@ function drawSphere() {
 
 // Generate point lights according to music
 function generatePointsLightAndAddToScene() {
-	var ptlight = new THREE.PointLight( 0xffffff, 1, 200 ); // (color, intensity, distance, decay)
-	ptlight.position.set( 100, 100, 100 );
-	scene.add( ptlight );
+	var numLights = analyserNode.fftSize / 5;
+	if (numLights > 80) numLights = 80;
+	var points = fibonacciSphere(140, numLights, false);
+	var ptlightSet = [];
+	for (var i = 0; i < points.length; ++i) {
+		var ptlight = new THREE.PointLight(0xffffff, 0.2, 200); // (color, intensity, distance, decay)
+		ptlight.position.set(points[i][0], points[i][1], points[i][2]);
+		scene.add(ptlight);
+		ptlightSet.push(ptlight);
+	}
 
 	function changeLightColor() {
 		if (document.getElementById("audioSource").paused) {
@@ -110,9 +115,13 @@ function generatePointsLightAndAddToScene() {
 		}
 		// Get current music data
 		var data = getFrequencyData();
-		var RGB = calculateRGB(data[10]);
-		ptlight.color.setHex("0x"+RGB);
-		console.log("data[0]: " + data[10] + ", " + "RGB: " + RGB);
+		for (var i = 0; i < numLights && i < data.length; ++i) {
+			var RGB = calculateRGB(data[i]);
+			ptlightSet[i].color.setHex("0x" + RGB);
+			var intensity = data[i]/256;
+			if (intensity > 0.3) intensity = 0.3;
+			ptlightSet[i].intensity = intensity;
+		}
 		setTimeout(changeLightColor, 50);
 	}
 
@@ -120,25 +129,36 @@ function generatePointsLightAndAddToScene() {
 }
 
 function calculateRGB(color) {
-	var baseColor = 170;	// 85 to 256 -- 1/3 of 256
-	var R = baseColor, G = baseColor, B = baseColor;
-	if (color <= 85)
-		R += color;
-	else if (color>85 && color<=(85*2)) {
+	var newColor = color;
+	var R, G, B;
+	if (newColor < 43) {
 		R = 255;
-		G += color-85;
-	}
-	else if (color>(85*2) && color<=(85*3)) {
-		R = 255;
+		G = newColor;
+		B = 0;
+	} else if (newColor < 43*2) {
+		R = 255-newColor;
 		G = 255;
-		B = color-(85*2);
-	}
-	else {
-		console.error("Invalid frequency data. Cannot generate valid color. Color is " + color);
+		B = 0;
+	} else if (newColor < 43*3) {
+		R = 0;
+		G = 255;
+		B = newColor;
+	} else if (newColor < 43*4) {
+		R = 0;
+		G = 255-newColor;
+		B = 255;
+	} else if (newColor < 43*5) {
+		R = newColor;
+		G = 0;
+		B = 255;
+	} else {
+		R = 255;
+		G = 0;
+		B = 255-newColor;
 	}
 
 	// Calculate final RGB value
-	var RGB = (R*65536)+(G*256)+B;
+	var RGB = (R*65536) + (G*256) + B;
 	RGB = RGB.toString(16);		// Convert to Hex value
 	return RGB;
 }
@@ -153,7 +173,7 @@ function fibonacciSphere(amp, samples, randomize) {
     var offset = 2./samples;
     var increment = Math.PI * (3. - Math.sqrt(5.));
 
-    for (var i=0; i<samples; ++i) {
+    for (var i = 0; i < samples; ++i) {
         var y = ((i * offset) - 1) + (offset / 2);
         var r = Math.sqrt(1 - Math.pow(y,2));
 
@@ -170,20 +190,21 @@ function fibonacciSphere(amp, samples, randomize) {
 
 function init() {
 	// camera 
-	scene = new THREE.Scene()
+	scene = new THREE.Scene();
+	scene.background = new THREE.Color(0xffffff);
 	camera = new THREE.PerspectiveCamera(50, document.body.clientWidth/sphereHeight, 1, 1000);
 	camera.position.z = 300;
 	scene.add(camera);
 
 	// lights
 	// Ambient Light
-	var ambientlight = new THREE.AmbientLight( 0x404040 ); // soft white light (R, G, B)
+	var ambientlight = new THREE.AmbientLight( 0x000000 ); // soft white light (R, G, B)
 	scene.add( ambientlight );
 
 	// sphere object
 	var radius = 100,
 		segments = 30,
-		rings = 20;
+		rings = 100;
 	var geometry = new THREE.SphereGeometry(radius, segments, rings);
 	var material = new THREE.MeshPhongMaterial({wireframe: false, wireframeLinewidth: 2, lights: true});
 	var mesh = new THREE.Mesh(geometry, material);
@@ -191,24 +212,6 @@ function init() {
 	//scene 
 	scene.add(mesh);
 
-	/*
-	// TEST FUNCTION
-	function testPointLightGenerator() {
-		var points = fibonacciSphere(120, 30, true);
-		console.log(points.length);
-		for (var i=0; i<points.length; ++i) {
-			var sphere1 = new THREE.SphereGeometry(2, 30, 5);
-			var material1 = new THREE.MeshPhongMaterial({wireframe: false, lights: false});
-			var mesh1 = new THREE.Mesh(sphere1, material1);
-			console.log("No. "+i+": "+points[i][0]+" "+points[i][1]+" "+points[i][2]);
-			scene.add(mesh1);
-			mesh1.position.set(points[i][0], points[i][1], points[i][2]);
-			mesh1.material.color = new THREE.Color(0xffffff);
-		}
-	}
-	testPointLightGenerator();
-	*/
-	
 	// renderer
 	renderer = new THREE.WebGLRenderer();
 	document.getElementById("mainBody").appendChild(renderer.domElement);
