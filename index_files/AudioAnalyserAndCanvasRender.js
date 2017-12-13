@@ -1,32 +1,46 @@
+// Some parameters
 var firstPreviewHeight = 350;
 var sphereHeight = 800;
-
-// Some global variables
-var analyserNode;
-var camera, scene, renderer;
 var numLights = 64;
 
+// Some global variables used inside program
+var analyserNode;
+var camera, scene, renderer;
+
+// Enter point of the entire program
+window.onload = function() {
+	veryFirstPreview();
+	drawSphere();
+	generatePointsLightAndAddToScene();
+};
+
+// Return a Uint8Array represent the current music data in frequency domain
 function getFrequencyData() {
 	var data = new Uint8Array(analyserNode.frequencyBinCount);
 	analyserNode.getByteFrequencyData(data);
 	return data;
 }
 
+// Return a Uint8Array represent the current music data in time domain
 function getTimeDomainData() {
 	var data = new Uint8Array(analyserNode.fftSize);
 	analyserNode.getByteTimeDomainData();
 	return data;
 }
 
+// Initialize the audio analyzer
 function AudioAnalysisInitialize() {
+	// Create audio context
 	var audioContext = window.AudioContext || window.webkitAudioContext;
 	var audioCtx = new AudioContext();
 
+	// Set the audio player
 	var audioSource = document.getElementById("audioSource");
 	audioSource.autoplay = true;
 	audioSource.loop = true;
 	audioSource.controls = true;
 
+	// Create some necessary nodes
 	var sourceNode = audioCtx.createMediaElementSource(audioSource);
 	var gainNode = audioCtx.createGain();
 	analyserNode = audioCtx.createAnalyser();
@@ -35,32 +49,40 @@ function AudioAnalysisInitialize() {
 	analyserNode.maxDecibels = 0;
 	analyserNode.smoothingTimeConstant = 0.8;
 
+	// Connect them
 	sourceNode.connect(analyserNode);
 	analyserNode.connect(gainNode);
 	gainNode.connect(audioCtx.destination);
 }
 
+// This is a basic preview of the audio data
 function preview() {
 	var canvas = document.getElementById("preview");
+	// Create canvas context and clear the canvas
 	var canvasCtx = canvas.getContext("2d");
 	canvasCtx.fillStyle = "rgb(255,255,255)";
 	canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
 	function draw() {
 		requestAnimationFrame(draw);
+		// When audio pause, stop drawing
 		if (document.getElementById("audioSource").paused) return;
+		// Auto adjust the drawing with width of browser
 		canvas.width = document.body.clientWidth;
 		canvas.height = firstPreviewHeight;
 		var data = getFrequencyData();
 
+		// Initialize some variable
 		canvasCtx.fillStyle = "rgb(255,255,255)";
 		canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 		var barWidth = canvas.width / data.length - 2;
 		var barHeight;
 		var x = 0;
 
+		// Draw each bar
 		for (var i = 0; i < data.length; ++i) {
 			barHeight = data[i]*canvas.height/255;
+			// The color of the bar related to the position of the bar
 			var r,g,b;
 			r = 100;
 			g = i;
@@ -75,6 +97,7 @@ function preview() {
 	draw();
 }
 
+// Initialize the file loader
 function reloadFile() {
 	document.getElementById("fileSelector").onchange = function(event) {
 		window.URL = window.URL || window.webkitURL;
@@ -85,21 +108,26 @@ function reloadFile() {
 	}
 }
 
+// Manage the preview
 function veryFirstPreview() {
 	reloadFile();
 	AudioAnalysisInitialize();
 	preview();
 }
 
+// Manage the sphere draw
 function drawSphere() {
 	init();
 	animate();
 }
 
-// Generate point lights according to music
+// Generate point lights
+// Basic idea is calculate coordinates of each point lights and then add them to the scene
 function generatePointsLightAndAddToScene() {
+	// fibonacciSphere is a function to calculte the position of each point light
 	var points = fibonacciSphere(140, numLights, false);
 	var ptlightSet = [];
+	// Add those lights to the scene
 	for (var i = 0; i < points.length; i++) {
 		var ptlight = new THREE.PointLight(0xffffff, 0.3, 200); // (color, intensity, distance, decay)
 		ptlight.position.set(points[i][0], points[i][1], points[i][2]);
@@ -108,16 +136,16 @@ function generatePointsLightAndAddToScene() {
 	}
 
 	var data_previous = [];
+	// Change colors with the frequency of music
 	function changeLightColor() {
 		if (document.getElementById("audioSource").paused) {
 			setTimeout(changeLightColor, 50);
 			return;
 		}
-		// Get current music data
+		// Get current music data and change the colors
 		var data = getFrequencyData();
 		for (var i = 0; i < numLights; i++) {
 			var j = i*4;
-			// console.log(data.length);
 			if (data_previous.length != data.length) var RGB = calculateRGB(data[j], 0);
 			else var RGB = calculateRGB(data[j], data[j]-data_previous[j]);
 			ptlightSet[i].color.setHex("0x" + RGB);
@@ -126,12 +154,14 @@ function generatePointsLightAndAddToScene() {
 			ptlightSet[i].intensity = intensity;
 		}
 		data_previous = data;
+		// Recursively call this function
 		setTimeout(changeLightColor, 50);
 	}
 
 	changeLightColor();
 }
 
+// Process the RGB data and the data from music
 function calculateRGB(color, difference) {
 	var newColor = color;
 	var newDifference = Math.trunc(difference * 1.5);
@@ -170,6 +200,7 @@ function calculateRGB(color, difference) {
 	return RGB;
 }
 
+// Calculate evenly distributed points in a sphere
 function fibonacciSphere(amp, samples, randomize) {
     var rnd = 1.;
     if (randomize) {
@@ -195,8 +226,9 @@ function fibonacciSphere(amp, samples, randomize) {
     return points;
 }
 
+// Initialize the three scene
 function init() {
-	// camera 
+	// camera
 	scene = new THREE.Scene();
 	var texture = new THREE.TextureLoader().load( "./index_files/background.jpg" );
 	scene.background = texture;
@@ -217,7 +249,7 @@ function init() {
 	var material = new THREE.MeshPhongMaterial({wireframe: false, wireframeLinewidth: 2, lights: true});
 	var mesh = new THREE.Mesh(geometry, material);
 
-	//scene 
+	//scene
 	scene.add(mesh);
 
 	// renderer
@@ -226,7 +258,6 @@ function init() {
 
 	new THREE.OrbitControls(camera, renderer.domElement);
 }
-
 
 function animate() {
 	render();
@@ -239,9 +270,3 @@ function render() {
 	camera.updateProjectionMatrix();
 	renderer.render(scene, camera);
 }
-
-window.onload = function() {
-	veryFirstPreview();
-	drawSphere();
-	generatePointsLightAndAddToScene();
-};
