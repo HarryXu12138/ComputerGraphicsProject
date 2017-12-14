@@ -160,7 +160,7 @@ function AudioAnalysisInitialize() {
 // This is a basic preview of the audio data
 function preview() {
     var canvas = document.getElementById("preview");
-    canvas.width = document.body.clientWidth;
+    canvas.width = document.body.clientWidth - 100;
     canvas.height = firstPreviewHeight;
     // Create canvas context and clear the canvas
     var canvasCtx = canvas.getContext("2d");
@@ -172,7 +172,7 @@ function preview() {
         // When audio pause, stop drawing
         if (document.getElementById("audioSource").paused) return;
         // Auto adjust the drawing with width of browser
-        canvas.width = document.body.clientWidth;
+        canvas.width = document.body.clientWidth - 100;
         canvas.height = firstPreviewHeight;
         var data = getFrequencyData();
 
@@ -347,7 +347,7 @@ function init() {
     scene = new THREE.Scene();
     var texture = new THREE.TextureLoader().load( "./index_files/background.jpg" );
     scene.background = texture;
-    camera = new THREE.PerspectiveCamera(50, document.body.clientWidth/sphereHeight, 1, 1000);
+    camera = new THREE.PerspectiveCamera(50, (document.body.clientWidth-100)/sphereHeight, 1, 1000);
     camera.position.z = 300;
     scene.add(camera);
 
@@ -380,8 +380,8 @@ function animate() {
 }
 
 function render() {
-    renderer.setSize(document.body.clientWidth, sphereHeight);
-    camera.aspect = document.body.clientWidth/sphereHeight;
+    renderer.setSize(document.body.clientWidth - 100, sphereHeight);
+    camera.aspect = (document.body.clientWidth - 100)/sphereHeight;
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
 }
