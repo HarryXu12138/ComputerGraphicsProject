@@ -206,9 +206,20 @@ function reloadFile() {
     document.getElementById("fileSelector").onchange = function(event) {
         window.URL = window.URL || window.webkitURL;
         var fileName = event.target.files[0];
+        var format = fileName.name.split(".");
+        if (format.length < 2) {
+            alert("File name error. Please choose another file.");
+            return;
+        }
+        var last = format.length - 1;
+        if (!(format[last] == "mp3" || format[last] == "MP3" || format[last] == "FLAC" || format[last] == "flac" || format[last] == "ogg" || format[last] == "OGG")) {
+            alert("File format error. Please choose another file.");
+            return;
+        }
         var objectURL = window.URL.createObjectURL(fileName);
-        document.getElementById("audioSource").src = objectURL;
-        document.getElementById("audioSource").load();
+        var audio = document.getElementById("audioSource");
+        audio.src = objectURL;
+        audio.load();
     }
 }
 
