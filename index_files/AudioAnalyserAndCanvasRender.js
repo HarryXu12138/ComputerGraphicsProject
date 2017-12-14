@@ -10,10 +10,10 @@ var camera, scene, renderer;
 
 // Enter point of the entire program
 window.onload = function() {
+    musicControllerInitialize();
     veryFirstPreview();
     drawSphere();
     generatePointsLightAndAddToScene();
-    musicControllerInitialize();
 };
 
 function musicControllerInitialize() {
